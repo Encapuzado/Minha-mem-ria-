@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Agile Dash</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <nav id="dock">
+    <div id="clock">--:--</div>
+    <button class="nav active" data-go="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg><span>Início</span></button>
+    <button class="nav" data-go="gauges"><svg viewBox="0 0 24 24"><path d="M12 4a9 9 0 00-9 9c0 2 .7 3.800 1.800 5.300h14.400A9 9 0 0012 4zm0 3l1.200 6.200a1.800 1.800 0 11-2.400 0z"/></svg><span>Painel</span></button>
+    <button class="nav" data-go="music"><svg viewBox="0 0 24 24"><path d="M9 18V6l11-2v12a3 3 0 11-2-2.800V7.600L11 8.800V18a3 3 0 11-2-2.800z"/></svg><span>Música</span></button>
+    <button class="nav" data-go="maps"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7zm0 9.500A2.500 2.500 0 1112 6.500a2.500 2.500 0 010 5z"/></svg><span>Mapas</span></button>
+    <button class="nav" data-go="diag"><svg viewBox="0 0 24 24"><path d="M22 6.300l-4 4-2.600-.7-.7-2.600 4-4A6 6 0 009.500 9.700L2 17.200 6.800 22l7.500-7.500A6 6 0 0022 6.300z"/></svg><span>Diagnóstico</span></button>
+    <button class="nav" data-go="settings"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 100 8 4 4 0 000-8zm8.500 5.500l2-1.500-2-3.500-2.400.9a8 8 0 00-1.600-.9L14 6h-4l-.5 2.500a8 8 0 00-1.600.9L5.500 8.500l-2 3.500 2 1.500a8 8 0 000 1.800l-2 1.500 2 3.500 2.400-.9c.5.400 1 .7 1.600.9L10 24h4l.5-2.500c.6-.2 1.100-.5 1.600-.9l2.400.9 2-3.500-2-1.500c.1-.6.1-1.200 0-1.800z" transform="translate(0 -3) scale(.9 .9) translate(1.200 2)"/></svg><span>Ajustes</span></button>
+    <div id="status"><i id="dot"></i><span id="statusTxt">Desconectado</span></div>
+  </nav>
+
+  <main>
+    <!-- INÍCIO -->
+    <section id="home" class="screen active">
+      <div class="card speedcard">
+        <div class="g" id="g-speed-big"></div>
+        <div class="minirpm"><b id="rpmTxt">0</b> rpm</div>
+        <div class="rpmbar"><i id="rpmBar"></i></div>
+      </div>
+      <div class="card media" id="miniPlayer">
+        <div class="art" id="art">♪</div>
+        <div class="meta"><b id="mTitle">Nada tocando</b><small id="mSub">Abra a aba Música</small></div>
+        <div class="ctrls">
+          <button data-m="prev">⏮</button><button data-m="play" id="mPlay">▶</button><button data-m="next">⏭</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="card stat" id="st-coolant"><small>Motor</small><b><span data-v="coolant">--</span><u>°C</u></b></div>
+        <div class="card stat" id="st-volt"><small>Bateria</small><b><span data-v="volt">--</span><u>V</u></b></div>
+        <div class="card stat" id="st-fuel"><small>Combustível</small><b><span data-v="fuel">--</span><u>%</u></b></div>
+        <div class="card stat" id="st-kml"><small>Consumo</small><b><span data-v="kml">--</span><u>km/l</u></b></div>
+      </div>
+    </section>
+
+    <!-- PAINEL -->
+    <section id="gauges" class="screen">
+      <div class="card gcard"><div class="g" id="g-rpm"></div></div>
+      <div class="card gcard"><div class="g" id="g-speed"></div></div>
+      <div class="gside">
+        <div class="card gcard"><div class="g" id="g-coolant"></div></div>
+        <div class="card gcard"><div class="g" id="g-fuel"></div></div>
+      </div>
+    </section>
+
+    <!-- MÚSICA -->
+    <section id="music" class="screen">
+      <div class="card player">
+        <div class="art big" id="art2">♪</div>
+        <div class="pmeta"><b id="pTitle">Nenhuma música</b><small id="pSub">Toque em “Adicionar músicas”</small>
+          <input type="range" id="seek" min="0" max="100" value="0">
+          <div class="ctrls big">
+            <button data-m="prev">⏮</button><button data-m="play" class="pp">▶</button><button data-m="next">⏭</button>
+          </div>
+        </div>
+      </div>
+      <div class="card list">
+        <label class="btn" for="files">+ Adicionar músicas</label>
+        <input id="files" type="file" accept="audio/*" multiple hidden>
+        <div id="tracks"></div>
+        <div class="apps">
+          <a class="app" href="intent://#Intent;package=com.spotify.music;end">Spotify</a>
+          <a class="app" href="intent://#Intent;package=com.google.android.apps.youtube.music;end">YT Music</a>
+          <a class="app" href="intent://#Intent;package=com.deezer.android.app;end">Deezer</a>
+        </div>
+      </div>
+      <audio id="audio" preload="auto"></audio>
+    </section>
+
+    <!-- MAPAS -->
+    <section id="maps" class="screen">
+      <a class="card bigbtn" href="https://waze.com/ul" target="_blank"><span>🧭</span><b>Waze</b></a>
+      <a class="card bigbtn" href="https://www.google.com/maps" target="_blank"><span>🗺️</span><b>Google Maps</b></a>
+      <a class="card bigbtn" href="tel:" ><span>📞</span><b>Telefone</b></a>
+    </section>
+
+    <!-- DIAGNÓSTICO -->
+    <section id="diag" class="screen">
+      <div class="card diagcard">
+        <h2>Códigos de falha (DTC)</h2>
+        <div id="dtcList" class="dtc">Conecte ao carro e toque em “Ler códigos”.</div>
+        <div class="row">
+          <button class="btn" id="dtcRead">Ler códigos</button>
+          <button class="btn danger" id="dtcClear">Apagar códigos</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- AJUSTES -->
+    <section id="settings" class="screen">
+      <div class="card setcard">
+        <h2>Conexão com o carro</h2>
+        <div class="row wrap">
+          <button class="btn" data-conn="sim">Simulador</button>
+          <button class="btn" data-conn="ble">Bluetooth BLE</button>
+          <button class="btn" data-conn="native">Bluetooth (app)</button>
+          <button class="btn danger" data-conn="off">Desconectar</button>
+        </div>
+        <div id="devices" class="devices"></div>
+        <p id="connMsg" class="hint"></p>
+        <h2>Alertas</h2>
+        <label class="field">Temperatura máxima do motor (°C)
+          <input type="number" id="setTemp" value="105" min="90" max="125"></label>
+        <label class="field">Bateria mínima (V)
+          <input type="number" id="setVolt" value="12" step="0.1"></label>
+        <button class="btn" id="fs">Tela cheia</button>
+      </div>
+    </section>
+  </main>
+  <div id="alert" hidden></div>
+</div>
+<script type="module" src="main.js"></script>
+</body>
+</html>
