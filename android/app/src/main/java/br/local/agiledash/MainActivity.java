@@ -10,6 +10,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(ElmBluetoothPlugin.class);
+        registerPlugin(MediaPlugin.class);
         super.onCreate(savedInstanceState);
         // Tela sempre ligada enquanto o app estiver aberto
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

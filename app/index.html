@@ -68,11 +68,16 @@
         </div>
       </div>
       <div class="card list">
-        <label class="btn" for="files">+ Adicionar músicas</label>
+        <div id="mediaAccess" class="access" hidden>
+          <b>Mostrar a música do Spotify aqui</b>
+          <small>Permita o “Acesso a notificações” para o Agile Dash. Funciona offline.</small>
+          <button class="btn" id="mediaAllow">Permitir</button>
+        </div>
+        <button class="btn spotify" data-pkg="com.spotify.music" data-web="https://open.spotify.com">Abrir Spotify</button>
+        <label class="btn ghost" for="files">+ Músicas do celular</label>
         <input id="files" type="file" accept="audio/*" multiple hidden>
         <div id="tracks"></div>
         <div class="apps">
-          <button class="app" data-pkg="com.spotify.music" data-web="https://open.spotify.com">Spotify</button>
           <button class="app" data-pkg="com.google.android.apps.youtube.music" data-web="https://music.youtube.com">YT Music</button>
           <button class="app" data-pkg="deezer.android.app" data-web="https://www.deezer.com">Deezer</button>
         </div>

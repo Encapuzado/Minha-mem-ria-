@@ -94,3 +94,13 @@ h2{font-size:clamp(15px,3.2vh,20px)}
 
 /* telas muito baixas */
 @media (max-height:380px){ .stat b{font-size:24px} }
+
+/* música: capa, Spotify e aviso de permissão */
+.art{background-size:cover;background-position:center;cursor:pointer}
+.art.has-img{background-color:#222}
+.btn.spotify{background:#1db954;color:#000}
+.btn.ghost{background:var(--card2);color:var(--txt)}
+.access{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:14px;background:#2a2410;border:1px solid #5a4a14}
+.access small{color:var(--dim);font-size:12px}
+.access[hidden]{display:none}
+#miniPlayer{cursor:pointer}

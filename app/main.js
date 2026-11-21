@@ -1,4 +1,5 @@
 import { ELM327 } from './obd.js';
+import { initMedia } from './media.js';
 import { SimTransport, BleTransport, NativeTransport, openApp } from './transports.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -200,42 +201,8 @@ $('#dtcClear').onclick = async () => {
   try { await elm.clearDTC(); $('#dtcList').textContent = 'Códigos apagados.'; } catch (e) { $('#dtcList').textContent = 'Erro: ' + e.message; }
 };
 
-/* ---------- Player de música ---------- */
-const audio = $('#audio');
-let tracks = [], cur = -1;
-function renderTracks() {
-  $('#tracks').innerHTML = '';
-  tracks.forEach((t, i) => {
-    const d = document.createElement('div'); d.className = 'trk' + (i === cur ? ' cur' : ''); d.textContent = t.name;
-    d.onclick = () => play(i); $('#tracks').appendChild(d);
-  });
-}
-function play(i) {
-  if (!tracks.length) return;
-  cur = (i + tracks.length) % tracks.length;
-  audio.src = tracks[cur].url; audio.play().catch(() => {});
-  const name = tracks[cur].name;
-  $('#pTitle').textContent = $('#mTitle').textContent = name;
-  $('#pSub').textContent = $('#mSub').textContent = `Faixa ${cur + 1} de ${tracks.length}`;
-  if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: name, artist: 'Agile Dash' });
-  renderTracks();
-}
-const toggle = () => { if (!tracks.length) return go('music'); audio.paused ? audio.play() : audio.pause(); };
-$('#files').onchange = e => {
-  tracks = [...e.target.files].map(f => ({ name: f.name.replace(/\.[^.]+$/, ''), url: URL.createObjectURL(f) }));
-  renderTracks(); if (tracks.length) play(0);
-};
-$$('[data-m]').forEach(b => b.onclick = () => {
-  const m = b.dataset.m; if (m === 'play') toggle(); else play(cur + (m === 'next' ? 1 : -1));
-});
-audio.onplay = audio.onpause = () => $$('[data-m="play"]').forEach(b => b.textContent = audio.paused ? '▶' : '⏸');
-audio.onended = () => play(cur + 1);
-audio.ontimeupdate = () => { if (audio.duration) $('#seek').value = (audio.currentTime / audio.duration) * 100; };
-$('#seek').oninput = e => { if (audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration; };
-if ('mediaSession' in navigator) {
-  navigator.mediaSession.setActionHandler('nexttrack', () => play(cur + 1));
-  navigator.mediaSession.setActionHandler('previoustrack', () => play(cur - 1));
-}
+/* ---------- Música (Spotify via Android + arquivos locais) ---------- */
+initMedia({ $, $$, go });
 
 /* ---------- Tela sempre ligada + PWA ---------- */
 let wl; const keepAwake = async () => { try { wl = await navigator.wakeLock?.request('screen'); } catch {} };

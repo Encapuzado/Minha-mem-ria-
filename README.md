@@ -35,6 +35,11 @@ Gerar o APK:
 Primeiro uso: pareie o "OBDII" no Bluetooth do Android (senha `1234` ou `0000`), abra o app,
 Ajustes → **Bluetooth (ELM327)** → escolha o adaptador.
 
+## Música (Spotify offline)
+O plugin nativo `MediaPlugin.java` lê o "tocando agora" do Android (Spotify, YT Music, Deezer) e controla
+play/pausa/próxima/posição. Funciona com músicas baixadas, sem internet. Na primeira vez, toque em
+**Permitir** na aba Música e ative o Agile Dash em "Acesso a notificações".
+
 ## Observações
 - O consumo (km/l) é estimado pelo MAF assumindo gasolina; com etanol (flex) o valor real é diferente.
 - PIDs que o carro não responde são desativados sozinhos após 3 falhas; a tensão cai para `ATRV`.
