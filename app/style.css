@@ -67,14 +67,14 @@ main{flex:1;min-width:0;position:relative;padding:10px}
 #tracks{flex:1;overflow:auto;display:flex;flex-direction:column;gap:4px}
 .trk{padding:10px 12px;border-radius:12px;background:var(--card2);font-size:clamp(13px,2.8vh,17px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trk.cur{background:var(--blue)}
-.apps{display:flex;gap:6px}.app{flex:1;text-align:center;padding:10px 4px;border-radius:12px;background:var(--card2);color:var(--txt);text-decoration:none;font-size:13px}
+.apps{display:flex;gap:6px}.app{font:inherit;border:0;cursor:pointer;flex:1;text-align:center;padding:10px 4px;border-radius:12px;background:var(--card2);color:var(--txt);text-decoration:none;font-size:13px}
 .btn{display:inline-block;background:var(--blue);color:#fff;padding:12px 18px;border-radius:14px;font-weight:600;font-size:clamp(13px,2.8vh,17px);text-align:center}
 .btn.danger{background:#3a2022;color:#ff8a80}.btn:active{filter:brightness(1.2)}
 .btn.sel{outline:3px solid var(--green)}
 
 /* mapas */
 #maps{grid-template-columns:repeat(3,1fr)}
-.bigbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--txt);text-decoration:none}
+.bigbtn{font:inherit;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--txt);text-decoration:none}
 .bigbtn span{font-size:clamp(40px,16vh,90px)} .bigbtn b{font-size:clamp(16px,4vh,26px)}
 
 /* diag e ajustes */

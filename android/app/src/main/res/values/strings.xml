@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Agile Dash</string>
+    <string name="title_activity_main">Agile Dash</string>
+    <string name="package_name">br.local.agiledash</string>
+    <string name="custom_url_scheme">br.local.agiledash</string>
+</resources>

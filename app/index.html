@@ -72,9 +72,9 @@
         <input id="files" type="file" accept="audio/*" multiple hidden>
         <div id="tracks"></div>
         <div class="apps">
-          <a class="app" href="intent://#Intent;package=com.spotify.music;end">Spotify</a>
-          <a class="app" href="intent://#Intent;package=com.google.android.apps.youtube.music;end">YT Music</a>
-          <a class="app" href="intent://#Intent;package=com.deezer.android.app;end">Deezer</a>
+          <button class="app" data-pkg="com.spotify.music" data-web="https://open.spotify.com">Spotify</button>
+          <button class="app" data-pkg="com.google.android.apps.youtube.music" data-web="https://music.youtube.com">YT Music</button>
+          <button class="app" data-pkg="deezer.android.app" data-web="https://www.deezer.com">Deezer</button>
         </div>
       </div>
       <audio id="audio" preload="auto"></audio>
@@ -82,8 +82,8 @@
 
     <!-- MAPAS -->
     <section id="maps" class="screen">
-      <a class="card bigbtn" href="https://waze.com/ul" target="_blank"><span>🧭</span><b>Waze</b></a>
-      <a class="card bigbtn" href="https://www.google.com/maps" target="_blank"><span>🗺️</span><b>Google Maps</b></a>
+      <button class="card bigbtn" data-pkg="com.waze" data-web="https://waze.com/ul"><span>🧭</span><b>Waze</b></button>
+      <button class="card bigbtn" data-pkg="com.google.android.apps.maps" data-web="https://www.google.com/maps"><span>🗺️</span><b>Google Maps</b></button>
       <a class="card bigbtn" href="tel:" ><span>📞</span><b>Telefone</b></a>
     </section>
 
@@ -106,7 +106,7 @@
         <div class="row wrap">
           <button class="btn" data-conn="sim">Simulador</button>
           <button class="btn" data-conn="ble">Bluetooth BLE</button>
-          <button class="btn" data-conn="native">Bluetooth (app)</button>
+          <button class="btn" data-conn="native">Bluetooth (ELM327)</button>
           <button class="btn danger" data-conn="off">Desconectar</button>
         </div>
         <div id="devices" class="devices"></div>

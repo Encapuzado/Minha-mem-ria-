@@ -1,0 +1,6 @@
+{
+  "appId": "br.local.agiledash",
+  "appName": "Agile Dash",
+  "webDir": "app",
+  "android": { "allowMixedContent": false }
+}

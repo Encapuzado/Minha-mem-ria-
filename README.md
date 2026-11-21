@@ -22,17 +22,18 @@ Por isso existem 3 transportes em `app/transports.js`:
 |---|---|---|
 | Simulador | nada (dados falsos) | qualquer navegador |
 | BLE | adaptadores BLE | Chrome no Android |
-| Bluetooth (app) | **ELM327 clássico** | app Android (Capacitor) |
+| Bluetooth (ELM327) | **ELM327 clássico** | app Android (`android/`) |
 
-### Empacotar como app Android (Capacitor)
-```bash
-npm init -y && npm i @capacitor/core @capacitor/cli @capacitor/android cordova-plugin-bluetooth-serial
-npx cap init AgileDash br.local.agiledash --web-dir app
-npx cap add android && npx cap sync
-npx cap open android   # Android Studio -> Run / gerar APK
-```
-Em `AndroidManifest.xml` confirme as permissões `BLUETOOTH`, `BLUETOOTH_ADMIN`, `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`.
-Antes, pareie o adaptador nas configurações do Android (senha `1234` ou `0000`).
+### App Android
+O app (pasta `android/`, Capacitor 7, Android 6+) já inclui o plugin nativo `ElmBluetoothPlugin.java`
+para o ELM327 clássico. Ele reconecta sozinho ao último adaptador quando a ignição é ligada.
+
+Gerar o APK:
+- **Na nuvem:** cada push roda o workflow *Gerar APK* (aba Actions do GitHub → artefato `agile-dash-apk`).
+- **Local:** `npm ci && npm run apk` (precisa do Android SDK + JDK 21) → `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+Primeiro uso: pareie o "OBDII" no Bluetooth do Android (senha `1234` ou `0000`), abra o app,
+Ajustes → **Bluetooth (ELM327)** → escolha o adaptador.
 
 ## Observações
 - O consumo (km/l) é estimado pelo MAF assumindo gasolina; com etanol (flex) o valor real é diferente.

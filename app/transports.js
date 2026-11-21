@@ -67,26 +67,36 @@ export class BleTransport {
   }
 }
 
-// 3) Bluetooth clássico (o ELM327 "mini" azul) via app Android com plugin
-//    cordova-plugin-bluetooth-serial (Capacitor/Cordova). Expõe window.bluetoothSerial.
+// 3) Bluetooth clássico (o ELM327 "mini" azul) via plugin nativo do app Android (ElmBluetoothPlugin.java)
+const plugin = () => window.Capacitor?.Plugins?.ElmBluetooth;
 export class NativeTransport {
-  name = 'Bluetooth (app)';
+  name = 'Bluetooth';
   onData = null;
-  static available() { return typeof window.bluetoothSerial !== 'undefined'; }
-  static list() {
-    return new Promise((ok, err) => window.bluetoothSerial.list(ok, err));
-  }
+  onClose = null;
+  static available() { return !!(window.Capacitor?.isNativePlatform?.() && plugin()); }
+  static async list() { return (await plugin().list()).devices; }
   constructor(address) { this.address = address; }
-  connect() {
-    const bs = window.bluetoothSerial;
-    return new Promise((ok, err) => {
-      bs.connect(this.address, () => {
-        const dec = new TextDecoder();
-        bs.subscribeRawData(buf => this.onData?.(dec.decode(buf)), () => {});
-        ok();
-      }, err);
-    });
+  async connect() {
+    const p = plugin();
+    this.subs = [
+      await p.addListener('data', e => this.onData?.(e.value)),
+      await p.addListener('disconnected', () => this.onClose?.()),
+    ];
+    await p.connect({ address: this.address });
   }
-  disconnect() { return new Promise(ok => window.bluetoothSerial.disconnect(ok, ok)); }
-  write(str) { return new Promise((ok, err) => window.bluetoothSerial.write(str, ok, err)); }
+  async disconnect() {
+    for (const s of this.subs || []) await s.remove();
+    this.subs = [];
+    await plugin().disconnect();
+  }
+  write(str) { return plugin().write({ value: str }); }
+}
+
+// Abre outro app instalado (Spotify, Waze...). Fora do app Android, usa o link web.
+export async function openApp(pkg, webUrl) {
+  if (NativeTransport.available()) {
+    try { await plugin().openApp({ package: pkg }); return true; } catch {}
+  }
+  if (webUrl) window.open(webUrl, '_blank');
+  return false;
 }

@@ -1,5 +1,5 @@
 import { ELM327 } from './obd.js';
-import { SimTransport, BleTransport, NativeTransport } from './transports.js';
+import { SimTransport, BleTransport, NativeTransport, openApp } from './transports.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -101,62 +101,86 @@ const tick = () => { $('#clock').textContent = new Date().toLocaleTimeString('pt
 tick(); setInterval(tick, 5000);
 
 /* ---------- Conexão OBD ---------- */
-let elm = null, transport = null;
-function setStatus(kind, txt) {
-  $('#dot').className = kind; $('#statusTxt').textContent = txt;
-}
+let elm = null, transport = null, retryTimer = 0, wantDevice = null;
+function setStatus(kind, txt) { $('#dot').className = kind; $('#statusTxt').textContent = txt; }
 const msg = t => { $('#connMsg').textContent = t; };
 
-async function disconnect() {
+async function disconnect(userAction = false) {
+  clearTimeout(retryTimer);
+  if (userAction) wantDevice = null;
   elm?.stop(); elm = null;
-  try { await transport?.disconnect(); } catch {}
-  transport = null;
+  const t = transport; transport = null;
+  try { await t?.disconnect(); } catch {}
   setStatus('', 'Desconectado');
   $$('[data-conn]').forEach(b => b.classList.remove('sel'));
 }
 
-async function connect(t, label) {
+// Reconexão automática ao ELM327 (ex.: carro desligado, ignição religada)
+function scheduleRetry(why) {
+  if (!wantDevice) return;
+  setStatus('wait', 'Aguardando carro…');
+  msg(why + ' — tentando de novo em 10 s');
+  clearTimeout(retryTimer);
+  retryTimer = setTimeout(() => connectNative(wantDevice.address, wantDevice.name), 10000);
+}
+
+async function connect(t, label, key) {
   await disconnect();
-  setStatus('wait', 'Conectando…'); msg('Conectando…');
+  setStatus('wait', 'Conectando…'); msg('Conectando a ' + label + '…');
   try {
     transport = t;
+    t.onClose = () => { if (transport === t) disconnect().then(() => scheduleRetry('Conexão perdida')); };
     await t.connect();
     elm = new ELM327(t);
     msg('Inicializando o adaptador (pode levar alguns segundos)…');
     await elm.init();
     setStatus('on', label); msg('Conectado: ' + label);
-    $(`[data-conn="${label === 'Simulador' ? 'sim' : t instanceof BleTransport ? 'ble' : 'native'}"]`)?.classList.add('sel');
+    $(`[data-conn="${key}"]`)?.classList.add('sel');
     go('home');
-    elm.start(set, e => { setStatus('wait', 'Reconectando…'); msg(String(e.message || e)); });
+    let fails = 0;
+    elm.start((k, v) => { fails = 0; set(k, v); }, e => {
+      msg(String(e.message || e));
+      if (++fails >= 5 && transport === t) disconnect().then(() => scheduleRetry('Carro parou de responder'));
+    });
   } catch (e) {
     await disconnect();
     msg('Falha: ' + (e.message || e));
-    setStatus('', 'Desconectado');
+    scheduleRetry('Falha: ' + (e.message || e));
   }
+}
+
+function connectNative(address, name) {
+  wantDevice = { address, name };
+  store.set('lastDev', wantDevice);
+  return connect(new NativeTransport(address), name || 'Bluetooth', 'native');
 }
 
 $$('[data-conn]').forEach(b => b.onclick = async () => {
   const k = b.dataset.conn;
-  if (k === 'off') return disconnect();
-  if (k === 'sim') return connect(new SimTransport(), 'Simulador');
+  if (k === 'off') { store.set('lastDev', null); return disconnect(true); }
+  wantDevice = null; clearTimeout(retryTimer);
+  if (k === 'sim') return connect(new SimTransport(), 'Simulador', 'sim');
   if (k === 'ble') {
     if (!navigator.bluetooth) return msg('Este navegador não tem Web Bluetooth. Use o Chrome no Android.');
-    return connect(new BleTransport(), 'Bluetooth BLE');
+    return connect(new BleTransport(), 'Bluetooth BLE', 'ble');
   }
   if (k === 'native') {
-    if (!NativeTransport.available()) return msg('O ELM327 mini azul usa Bluetooth clássico: precisa do app Android (veja o README).');
+    if (!NativeTransport.available()) return msg('O ELM327 mini azul usa Bluetooth clássico: só funciona no app Android instalado.');
     try {
       const list = await NativeTransport.list();
       const box = $('#devices'); box.innerHTML = '';
       list.forEach(d => {
         const bt = document.createElement('button'); bt.className = 'btn'; bt.textContent = d.name || d.address;
-        bt.onclick = () => { box.innerHTML = ''; store.set('lastDev', d.address); connect(new NativeTransport(d.address), 'Bluetooth'); };
+        bt.onclick = () => { box.innerHTML = ''; connectNative(d.address, d.name); };
         box.appendChild(bt);
       });
-      msg(list.length ? 'Escolha o adaptador (OBDII / V-LINK…). Pareie antes nas configurações do Android (senha 1234 ou 0000).' : 'Nenhum dispositivo pareado.');
-    } catch (e) { msg('Erro: ' + e); }
+      msg(list.length ? 'Escolha o adaptador (normalmente “OBDII”).' : 'Nenhum dispositivo pareado. Pareie o OBDII nas configurações de Bluetooth do Android (senha 1234).');
+    } catch (e) { msg('Erro: ' + (e.message || e)); }
   }
 });
+
+/* ---------- Abrir outros apps ---------- */
+$$('[data-pkg]').forEach(b => b.onclick = () => openApp(b.dataset.pkg, b.dataset.web));
 
 /* ---------- Diagnóstico ---------- */
 $('#dtcRead').onclick = async () => {
@@ -219,6 +243,8 @@ document.addEventListener('click', keepAwake, { once: true });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) keepAwake(); });
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
 
-// Dica: ?sim abre já com o simulador
-if (new URLSearchParams(location.search).has('sim')) connect(new SimTransport(), 'Simulador');
+// Ao abrir: ?sim liga o simulador; no app, reconecta sozinho ao último ELM327 usado
+const last = store.get('lastDev', null);
+if (new URLSearchParams(location.search).has('sim')) connect(new SimTransport(), 'Simulador', 'sim');
+else if (last?.address && NativeTransport.available()) connectNative(last.address, last.name);
 render();
